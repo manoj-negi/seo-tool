@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SEO Analyzer</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>SEO Analyzer Tool</h1>
+
+    <form method="POST" action="/analyze">
+        <input type="text" name="url" placeholder="Enter URL (example.com)" required>
+        <button type="submit">Analyze</button>
+    </form>
+
+    {% if result %}
+    <div class="result">
+        <h2>Results for {{ url }}</h2>
+
+        <p><strong>Title:</strong> {{ result.title }}</p>
+        <p><strong>Title Length:</strong> {{ result.title_length }}</p>
+        <p><strong>Meta Description:</strong> {{ result.meta_description }}</p>
+
+        <p><strong>H1 Count:</strong> {{ result.h1_count }}</p>
+        <p><strong>H2 Count:</strong> {{ result.h2_count }}</p>
+        <p><strong>H3 Count:</strong> {{ result.h3_count }}</p>
+
+        <p><strong>Total Images:</strong> {{ result.total_images }}</p>
+        <p><strong>Missing ALT Tags:</strong> {{ result.images_missing_alt }}</p>
+
+        <p><strong>Internal Links:</strong> {{ result.internal_links }}</p>
+
+        <p><strong>External Links:</strong> {{ result.external_links }}</p>
+        <p><strong>Word Count:</strong> {{ result.word_count }}</p>
+        <p><strong>Page Load Time:</strong> {{ result.load_time }} sec</p>
+        <hr>
+
+        <p><strong>Sitemap:</strong> 
+            {% if result.sitemap_found %}
+                 Found
+            {% else %}
+                 Not Found
+            {% endif %}
+        </p>
+
+        {% if result.sitemap_found %}
+        <p><strong>Sitemap URL:</strong> {{ result.sitemap_url }}</p>
+        <p><strong>Total URLs:</strong> {{ result.sitemap_total_urls }}</p>
+        {% endif %}
+
+    </div>
+    {% endif %}
+</div>
+
+</body>
+</html>
