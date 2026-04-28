@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request
+import asyncio
 from analyzer.seo import analyze_seo
 
 app = Flask(__name__)
 
-@app.route("/")
+@app.route("/", methods=["GET"])
 def home():
     return render_template("index.html")
 
@@ -11,10 +12,8 @@ def home():
 def analyze():
     url = request.form.get("url")
 
-    if not url:
-        return "Please enter URL"
+    result = asyncio.run(analyze_seo(url))  # IMPORTANT FIX
 
-    result = analyze_seo(url)
     return render_template("index.html", result=result, url=url)
 
 if __name__ == "__main__":

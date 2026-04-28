@@ -18,35 +18,168 @@
     <div class="result">
         <h2>Results for {{ url }}</h2>
 
-        <p><strong>Title:</strong> {{ result.title }}</p>
-        <p><strong>Title Length:</strong> {{ result.title_length }}</p>
-        <p><strong>Meta Description:</strong> {{ result.meta_description }}</p>
+        <!-- ================= SUMMARY ================= -->
+        <div class="summary">
+            <div class="card">
+                <h3>Pages Crawled</h3>
+                <p>{{ result.summary.pages_crawled }}</p>
+            </div>
 
-        <p><strong>H1 Count:</strong> {{ result.h1_count }}</p>
-        <p><strong>H2 Count:</strong> {{ result.h2_count }}</p>
-        <p><strong>H3 Count:</strong> {{ result.h3_count }}</p>
+            <div class="card">
+                <h3>SEO Score</h3>
+                <p>{{ result.summary.seo_score }}/100</p>
+            </div>
+        </div>
 
-        <p><strong>Total Images:</strong> {{ result.total_images }}</p>
-        <p><strong>Missing ALT Tags:</strong> {{ result.images_missing_alt }}</p>
+        <!-- ================= TABLE ================= -->
+        <h3>Page-wise Analysis</h3>
 
-        <p><strong>Internal Links:</strong> {{ result.internal_links }}</p>
+        <div class="table-wrapper">
+        <table>
+            <tr>
+                <th>URL</th>
+                <th>H1</th>
+                <th>H2</th>
+                <th>H3</th>
+                <th>Title</th>
+                <th>Meta</th>
+                <th>Size</th>
+                <th>Images</th>
+                <th>Large</th>
+                <th>Avg Img</th>
+                <th>Resolution</th>
+                <th>Links</th>
+                <th>Words</th>
+                <th>Issues</th>
+            </tr>
 
-        <p><strong>External Links:</strong> {{ result.external_links }}</p>
-        <p><strong>Word Count:</strong> {{ result.word_count }}</p>
-        <p><strong>Page Load Time:</strong> {{ result.load_time }} sec</p>
-        <hr>
+            {% for page in result.pages %}
+            <tr>
+                <td class="url">{{ page.url }}</td>
+                <td>{{ page.h1 }}</td>
+                <td>{{ page.h2 }}</td>
+                <td>{{ page.h3 }}</td>
+                <td>{{ page.title_length }}</td>
+                <td>{{ page.meta_length }}</td>
+                <!-- <td>{{ page.page_size_kb }} KB</td> -->
+                <td>
+                    {{ page.page_size_kb }} KB <br>
+                    <small>{{ page.size_status }}</small>
+                </td>
 
-        <p><strong>Sitemap:</strong> 
-            {% if result.sitemap_found %}
-                 Found
-            {% else %}
-                 Not Found
-            {% endif %}
-        </p>
+                <!-- <td>{{ page.images }} <br><small>{{ page.missing_alt }} alt</small></td> -->
+                <td>
+                    {{ page.images }} images <br>
+                    <small>{{ page.missing_alt }} missing ALT</small>
+                </td>
+                <!-- <td>{{ page.large_images }}</td> -->
+                <td>
+                        {{ page.large_images }}
+                        {% for img in page.large_image_urls %}
+                            <div>
+                                <a href="{{ img.url }}" target="_blank">{{ img.url }}</a><br>
+                                <small>Size: {{ img.size_kb }} KB</small>
+                            </div>
+                        {% endfor %}
+                </td>
+                <td>{{ page.avg_image_size_kb }}</td>
 
-        {% if result.sitemap_found %}
-        <p><strong>Sitemap URL:</strong> {{ result.sitemap_url }}</p>
-        <p><strong>Total URLs:</strong> {{ result.sitemap_total_urls }}</p>
+                <td>
+                    {% if page.image_resolutions %}
+                        {% for r in page.image_resolutions %}
+                            {{ r }}<br>
+                        {% endfor %}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+
+                <!-- <td>{{ page.internal_links }} / {{ page.external_links }}</td> -->
+                 <td>
+                    {{ page.internal_links }} internal <br>
+                    {{ page.external_links }} external
+                 </td>
+                <!-- <td>{{ page.word_count }}</td> -->
+                 <td>
+                    {{ page.word_count }} words <br>
+                    <small>{{ page.word_status }}</small>
+                 </td>
+
+                <td>
+                    {% if page.issues %}
+                        <ul class="issues">
+                        {% for issue in page.issues %}
+                            <li>{{ issue }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        <span class="good">Good</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        </div>
+
+
+<!-- ================= PERFORMANCE ANALYSIS ================= -->
+<h3>Performance Analysis</h3>
+
+{% for page in result.pages %}
+<div class="performance-card">
+    <h4>{{ page.url }}</h4>
+
+    <div class="perf-summary">
+        <p><strong>Page Load Time:</strong> {{ page.page_load_time }} sec</p>
+        <p><strong>CSS Files:</strong> {{ page.performance_summary.total_css }}</p>
+        <p><strong>JS Files:</strong> {{ page.performance_summary.total_js }}</p>
+        <p><strong>Total Resource Size:</strong> {{ page.performance_summary.total_resource_size_kb }} KB</p>
+    </div>
+
+    <!-- CSS FILES -->
+    {% if page.css_files %}
+    <div class="resource-block">
+        <h5>CSS Files</h5>
+        <ul>
+            {% for css in page.css_files %}
+                <li>
+                    <a href="{{ css.url }}" target="_blank">{{ css.url }}</a><br>
+                    Size: {{ css.size_kb }} KB | Load: {{ css.load_time }} sec
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <!-- JS FILES -->
+    {% if page.js_files %}
+    <div class="resource-block">
+        <h5>JS Files</h5>
+        <ul>
+            {% for js in page.js_files %}
+                <li>
+                    <a href="{{ js.url }}" target="_blank">{{ js.url }}</a><br>
+                    Size: {{ js.size_kb }} KB | Load: {{ js.load_time }} sec
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+</div>
+{% endfor %}
+
+        <!-- ================= BROKEN LINKS ================= -->
+        <h3>Broken Links</h3>
+
+        {% if result.broken_links %}
+            <ul class="broken">
+                {% for link in result.broken_links %}
+                    <li>{{ link }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="good">No broken links found</p>
         {% endif %}
 
     </div>
